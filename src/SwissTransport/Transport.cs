@@ -8,8 +8,7 @@ namespace SwissTransport
     {
         public Stations GetStations(string query)
         {
-            query = System.Uri.EscapeDataString(query);
-            var request = CreateWebRequest("http://transport.opendata.ch/v1/locations?query=" + query);
+            var request = CreateWebRequest("http://transport.opendata.ch/v1/locations?query=" + query);  //erstellung der url abfragen
             var response = request.GetResponse();
             var responseStream = response.GetResponseStream();
 
@@ -17,7 +16,7 @@ namespace SwissTransport
             {
                 var message = new StreamReader(responseStream).ReadToEnd();
                 var stations = JsonConvert.DeserializeObject<Stations>(message
-                    , new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                    , new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }); //datensammlung
                 return stations;
             }
 
@@ -26,9 +25,7 @@ namespace SwissTransport
 
         public StationBoardRoot GetStationBoard(string station, string id)
         {
-            station = System.Uri.EscapeDataString(station);
-            id = System.Uri.EscapeDataString(id);
-            var request = CreateWebRequest("http://transport.opendata.ch/v1/stationboard?station=" + station + "&id=" + id);
+            var request = CreateWebRequest("http://transport.opendata.ch/v1/stationboard?Station=" + station + "&id=" + id); //Request wird mit der ID erstellt
             var response = request.GetResponse();
             var responseStream = response.GetResponseStream();
 
@@ -43,11 +40,11 @@ namespace SwissTransport
             return null;
         }
 
-        public Connections GetConnections(string fromStation, string toStation)
+
+        //API erweitert, mit Datum und Zeit
+        public Connections GetConnections(string fromStation, string toStattion, string date, string time)
         {
-            fromStation = System.Uri.EscapeDataString(fromStation);
-            toStation = System.Uri.EscapeDataString(toStation);
-            var request = CreateWebRequest("http://transport.opendata.ch/v1/connections?from=" + fromStation + "&to=" + toStation);
+            var request = CreateWebRequest("http://transport.opendata.ch/v1/connections?from=" + fromStation + "&to=" + toStattion + "&date=" + date + "&time=" + time + "&limit=6");
             var response = request.GetResponse();
             var responseStream = response.GetResponseStream();
 
@@ -64,13 +61,19 @@ namespace SwissTransport
 
         private static WebRequest CreateWebRequest(string url)
         {
-            var request = WebRequest.Create(url);
-            var webProxy = WebRequest.DefaultWebProxy;
+            var request = WebRequest.Create(url); //URL wird übergeben z.B. http://transport.opendata.ch/v1/locations?query=Luzern
+
+            var webProxy = WebRequest.DefaultWebProxy; //z.B. 	http://transport.opendata.ch/v1/stationboard?Station=Luzern&id=8505000
 
             webProxy.Credentials = CredentialCache.DefaultNetworkCredentials;
             request.Proxy = webProxy;
-            
+
             return request;
+        }
+
+        public Connections GetConnections(string fromStation, string toStattion)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
